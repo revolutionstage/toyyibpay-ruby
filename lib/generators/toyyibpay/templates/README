@@ -1,0 +1,47 @@
+===============================================================================
+
+ToyyibPay has been installed!
+
+Next steps:
+
+1. Add your API credentials to your environment variables:
+
+   # For development, add to .env file
+   TOYYIBPAY_API_KEY=your-secret-key
+   TOYYIBPAY_CATEGORY_CODE=your-category-code
+   TOYYIBPAY_SANDBOX=true
+
+   # Or use Rails credentials (Rails 5.2+):
+   rails credentials:edit
+
+   And add:
+   toyyibpay:
+     api_key: your-secret-key
+     category_code: your-category-code
+     sandbox: true
+
+2. Update config/initializers/toyyibpay.rb if needed
+
+3. Get your API credentials:
+   - Production: https://toyyibpay.com
+   - Sandbox: https://dev.toyyibpay.com
+
+4. Start using ToyyibPay in your Rails app:
+
+   # Create a bill
+   bill = ToyyibPay.bills.create(
+     billName: "Invoice #001",
+     billDescription: "Payment for services",
+     billPriceSetting: "0",
+     billPayorInfo: "1",
+     billAmount: "10000",
+     billPaymentChannel: "0"
+   )
+
+   # Get payment URL
+   payment_url = ToyyibPay.bills.payment_url(bill[0]["BillCode"])
+
+For more information, visit:
+https://github.com/revolutionstage/toyyibpay-rails
+
+===============================================================================
