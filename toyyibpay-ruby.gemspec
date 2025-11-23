@@ -3,7 +3,7 @@
 require_relative "lib/toyyibpay/version"
 
 Gem::Specification.new do |spec|
-  spec.name = "toyyibpay"
+  spec.name = "toyyibpay-ruby"
   spec.version = ToyyibPay::VERSION
   spec.authors = ["KintsugiDesign"]
   spec.email = ["developers@kintsugidesign.com"]
