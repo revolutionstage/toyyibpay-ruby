@@ -1,6 +1,6 @@
 # ToyyibPay Ruby Gem
 
-[![Gem Version](https://badge.fury.io/rb/toyyibpay.svg)](https://badge.fury.io/rb/toyyibpay)
+[![Gem Version](https://badge.fury.io/rb/toyyibpay-ruby.svg)](https://badge.fury.io/rb/toyyibpay-ruby)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.txt)
 
 Ruby bindings for the [toyyibPay](https://toyyibpay.com) payment gateway API. This gem provides a clean, intuitive interface for integrating toyyibPay into your Ruby and Ruby on Rails applications.
@@ -24,7 +24,7 @@ ToyyibPay is a Malaysian payment gateway that supports FPX (online banking) and 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'toyyibpay'
+gem 'toyyibpay-ruby'
 ```
 
 And then execute:
@@ -36,7 +36,7 @@ bundle install
 Or install it yourself as:
 
 ```bash
-gem install toyyibpay
+gem install toyyibpay-ruby
 ```
 
 ## Quick Start
@@ -78,7 +78,7 @@ transactions = ToyyibPay.bills.transactions(bill[0]["BillCode"])
 1. **Install the gem:**
 
 ```bash
-bundle add toyyibpay
+bundle add toyyibpay-ruby
 ```
 
 2. **Run the generator:**
@@ -449,7 +449,7 @@ bundle exec rspec
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/revolutionstage/toyyibpay-rails
+Bug reports and pull requests are welcome on GitHub at https://github.com/revolutionstage/toyyibpay-ruby
 
 ## License
 
@@ -469,5 +469,5 @@ This gem is inspired by the excellent [stripe-ruby](https://github.com/stripe/st
 ## Support
 
 For issues related to:
-- **This gem**: [Open an issue](https://github.com/revolutionstage/toyyibpay-rails/issues)
+- **This gem**: [Open an issue](https://github.com/revolutionstage/toyyibpay-ruby/issues)
 - **toyyibPay API**: Contact toyyibPay support at https://toyyibpay.com

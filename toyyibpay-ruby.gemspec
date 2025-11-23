@@ -3,22 +3,22 @@
 require_relative "lib/toyyibpay/version"
 
 Gem::Specification.new do |spec|
-  spec.name = "toyyibpay"
+  spec.name = "toyyibpay-ruby"
   spec.version = ToyyibPay::VERSION
   spec.authors = ["KintsugiDesign"]
   spec.email = ["developers@kintsugidesign.com"]
 
   spec.summary = "Ruby bindings for the toyyibPay API"
   spec.description = "toyyibPay is a Malaysian payment gateway. This gem provides Ruby bindings for the toyyibPay API, with support for both plain Ruby and Ruby on Rails applications."
-  spec.homepage = "https://github.com/revolutionstage/toyyibpay-rails"
+  spec.homepage = "https://github.com/revolutionstage/toyyibpay-ruby"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 2.7.0"
 
   spec.metadata["homepage_uri"] = spec.homepage
-  spec.metadata["source_code_uri"] = "https://github.com/revolutionstage/toyyibpay-rails"
-  spec.metadata["changelog_uri"] = "https://github.com/revolutionstage/toyyibpay-rails/blob/main/CHANGELOG.md"
-  spec.metadata["bug_tracker_uri"] = "https://github.com/revolutionstage/toyyibpay-rails/issues"
-  spec.metadata["documentation_uri"] = "https://github.com/revolutionstage/toyyibpay-rails"
+  spec.metadata["source_code_uri"] = "https://github.com/revolutionstage/toyyibpay-ruby"
+  spec.metadata["changelog_uri"] = "https://github.com/revolutionstage/toyyibpay-ruby/blob/main/CHANGELOG.md"
+  spec.metadata["bug_tracker_uri"] = "https://github.com/revolutionstage/toyyibpay-ruby/issues"
+  spec.metadata["documentation_uri"] = "https://github.com/revolutionstage/toyyibpay-ruby"
 
   # Specify which files should be added to the gem when it is released.
   spec.files = Dir.glob("lib/**/*.rb") + %w[
