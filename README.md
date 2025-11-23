@@ -449,7 +449,7 @@ bundle exec rspec
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/revolutionstage/toyyibpay-rails
+Bug reports and pull requests are welcome on GitHub at https://github.com/revolutionstage/toyyibpay-ruby
 
 ## License
 
@@ -469,5 +469,5 @@ This gem is inspired by the excellent [stripe-ruby](https://github.com/stripe/st
 ## Support
 
 For issues related to:
-- **This gem**: [Open an issue](https://github.com/revolutionstage/toyyibpay-rails/issues)
+- **This gem**: [Open an issue](https://github.com/revolutionstage/toyyibpay-ruby/issues)
 - **toyyibPay API**: Contact toyyibPay support at https://toyyibpay.com
