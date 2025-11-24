@@ -22,7 +22,9 @@ module ToyyibPay
       body = build_body(params)
 
       Util.log(config.logger, :info, "#{method.upcase} #{url}")
-      Util.log(config.logger, :debug, "Request params: #{params.inspect}")
+      # Redact sensitive information from logs
+      safe_params = Util.redact_sensitive_params(params)
+      Util.log(config.logger, :debug, "Request params: #{safe_params.inspect}")
 
       response = execute_request_with_retry(method, url, headers, body)
       handle_response(response)

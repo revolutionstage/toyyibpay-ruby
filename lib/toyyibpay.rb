@@ -14,6 +14,7 @@ require_relative "toyyibpay/util"
 require_relative "toyyibpay/api_requestor"
 require_relative "toyyibpay/api_resource"
 require_relative "toyyibpay/client"
+require_relative "toyyibpay/callback_verifier"
 
 # Resources
 require_relative "toyyibpay/resources/bank"
@@ -92,6 +93,13 @@ module ToyyibPay
     #
     # @return [ToyyibPay::Client]
     def client
+      Client.default_client
+    end
+
+    # Get default client for internal use
+    #
+    # @return [ToyyibPay::Client]
+    def default_client
       Client.default_client
     end
 

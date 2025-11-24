@@ -60,13 +60,12 @@ class PaymentsController < ApplicationController
   end
 
   # Step 3: Handle payment callback (webhook)
+  #
+  # SECURITY WARNING: This demonstrates the SECURE way to handle callbacks.
+  # NEVER trust callback parameters directly - always verify with the API!
   def callback
-    # Extract payment details from toyyibPay callback
+    # Extract bill code from callback
     bill_code = params[:billcode]
-    status_id = params[:status_id]
-    amount = params[:amount]
-    reference_no = params[:refno]
-    transaction_time = params[:transaction_time]
 
     # Find the order
     order = Order.find_by(toyyibpay_bill_code: bill_code)
@@ -77,31 +76,40 @@ class PaymentsController < ApplicationController
       return
     end
 
-    # Update order based on payment status
-    case status_id
-    when "1"
-      # Payment successful
+    # CRITICAL: Verify the payment with ToyyibPay API
+    # The callback is just a "wake-up" signal - we MUST verify the actual status
+    verifier = ToyyibPay::CallbackVerifier.new
+    result = verifier.verify(
+      bill_code: bill_code,
+      expected_amount: (order.total * 100).to_i.to_s, # Convert to cents
+      expected_status: "1" # 1 = successful payment
+    )
+
+    if result.verified?
+      # Payment verified! Safe to process the order
       order.mark_as_paid!(
-        amount: amount,
-        reference_no: reference_no,
-        paid_at: transaction_time
+        amount: result.amount,
+        reference_no: result.reference_no,
+        paid_at: result.paid_at
       )
 
       # Send confirmation email
       OrderMailer.payment_confirmed(order).deliver_later
 
-      Rails.logger.info("ToyyibPay: Payment successful for order #{order.id}")
-    when "2"
-      # Payment pending
-      order.mark_as_pending!
-      Rails.logger.info("ToyyibPay: Payment pending for order #{order.id}")
-    when "3"
-      # Payment failed
-      order.mark_as_failed!
-      Rails.logger.warn("ToyyibPay: Payment failed for order #{order.id}")
+      Rails.logger.info("ToyyibPay: Payment verified and processed for order #{order.id}")
+    else
+      # Verification failed - possible fraud attempt
+      Rails.logger.error("ToyyibPay: Callback verification FAILED for order #{order.id}: #{result.errors.join(', ')}")
+
+      # Optionally notify security team
+      SecurityMailer.suspicious_callback(order, result.errors).deliver_later
     end
 
     # Always return 200 OK to acknowledge receipt
+    head :ok
+  rescue ToyyibPay::Error => e
+    # API error during verification
+    Rails.logger.error("ToyyibPay: API error during callback verification: #{e.message}")
     head :ok
   end
 

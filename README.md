@@ -16,8 +16,21 @@ ToyyibPay is a Malaysian payment gateway that supports FPX (online banking) and 
 - ✅ Comprehensive error handling
 - ✅ Thread-safe client implementation
 - ✅ Automatic retry with exponential backoff
-- ✅ Detailed logging support
+- ✅ Detailed logging support with sensitive data redaction
+- ✅ **Built-in callback verification (prevents payment fraud)**
+- ✅ **Input sanitization (prevents XSS and injection attacks)**
 - ✅ Well-documented and tested
+
+## 🔐 Security
+
+**This gem includes critical security features for payment processing:**
+
+- **`CallbackVerifier`**: Prevents callback spoofing/payment fraud (CRITICAL)
+- **Input sanitization**: Automatic XSS prevention for user-provided text
+- **Secure logging**: Redacts API keys and PII from logs
+- **Parameter validation**: Prevents tampering with payment amounts
+
+**📖 Read [SECURITY.md](SECURITY.md) before implementing payment callbacks.**
 
 ## Installation
 
@@ -352,6 +365,12 @@ end
 
 ## Payment Callback
 
+### 🚨 CRITICAL SECURITY WARNING
+
+**NEVER trust callback parameters directly!** ToyyibPay does not provide HMAC signatures for callbacks. Without verification, attackers can forge payment notifications and receive goods without paying.
+
+**Always use `ToyyibPay::CallbackVerifier` to verify payments with the API.**
+
 When a payment is completed, toyyibPay will POST to your `billCallbackUrl` with these parameters:
 
 | Parameter | Description |
@@ -364,7 +383,7 @@ When a payment is completed, toyyibPay will POST to your `billCallbackUrl` with 
 | `amount` | Amount paid |
 | `transaction_time` | Transaction timestamp |
 
-Example Rails controller:
+### ✅ Secure Implementation (Required)
 
 ```ruby
 class PaymentCallbacksController < ApplicationController
@@ -372,25 +391,38 @@ class PaymentCallbacksController < ApplicationController
 
   def create
     bill_code = params[:billcode]
-    status_id = params[:status_id]
-    amount = params[:amount]
+    order = Order.find_by(toyyibpay_bill_code: bill_code)
 
-    case status_id
-    when "1"
-      # Payment successful
-      handle_successful_payment(bill_code, amount)
-    when "2"
-      # Payment pending
-      handle_pending_payment(bill_code)
-    when "3"
-      # Payment failed
-      handle_failed_payment(bill_code)
+    return head :ok unless order
+
+    # CRITICAL: Verify with ToyyibPay API (the callback is just a "wake-up" signal)
+    verifier = ToyyibPay::CallbackVerifier.new
+    result = verifier.verify(
+      bill_code: bill_code,
+      expected_amount: (order.total * 100).to_i.to_s, # Convert to cents
+      expected_status: "1" # 1 = successful payment
+    )
+
+    if result.verified?
+      # Payment verified - safe to process
+      order.mark_as_paid!(
+        amount: result.amount,
+        reference_no: result.reference_no,
+        paid_at: result.paid_at
+      )
+      Rails.logger.info("Payment verified for order #{order.id}")
+    else
+      # Verification failed - possible fraud attempt
+      Rails.logger.error("Callback verification FAILED: #{result.errors.join(', ')}")
+      SecurityMailer.suspicious_callback(order, result.errors).deliver_later
     end
 
     head :ok
   end
 end
 ```
+
+**See [SECURITY.md](SECURITY.md) for complete security guidelines.**
 
 ## Thread Safety
 

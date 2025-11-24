@@ -65,5 +65,92 @@ module ToyyibPay
     rescue JSON::ParserError => e
       raise APIError, "Invalid JSON response: #{e.message}"
     end
+
+    # Sanitize text input to prevent XSS attacks
+    # This provides basic HTML entity encoding for user-provided text
+    # that will be displayed in web interfaces
+    #
+    # @param text [String] Text to sanitize
+    # @return [String] Sanitized text
+    def sanitize_text(text)
+      return text unless text.is_a?(String)
+
+      text.to_s
+          .gsub("&", "&amp;")
+          .gsub("<", "&lt;")
+          .gsub(">", "&gt;")
+          .gsub('"', "&quot;")
+          .gsub("'", "&#39;")
+    end
+
+    # Redact sensitive information from parameters for logging
+    #
+    # @param params [Hash] Parameters to redact
+    # @return [Hash] Parameters with sensitive values redacted
+    def redact_sensitive_params(params)
+      return params unless params.is_a?(Hash)
+
+      sensitive_keys = %w[
+        userSecretKey
+        api_key
+        secret
+        password
+        token
+        billEmail
+        billPhone
+        billTo
+        billpayorEmail
+        billpayorPhone
+      ]
+
+      params.transform_values.with_index do |value, key|
+        if sensitive_keys.any? { |sk| key.to_s.downcase.include?(sk.downcase) }
+          "[REDACTED]"
+        elsif value.is_a?(Hash)
+          redact_sensitive_params(value)
+        else
+          value
+        end
+      end
+    end
+
+    # Validate and sanitize bill parameters
+    # Prevents common injection attacks and ensures data integrity
+    #
+    # @param params [Hash] Bill parameters
+    # @return [Hash] Sanitized parameters
+    def sanitize_bill_params(params)
+      sanitized = params.dup
+
+      # Sanitize text fields that may contain user input
+      text_fields = %i[billName billDescription billContentEmail]
+      text_fields.each do |field|
+        sanitized[field] = sanitize_text(sanitized[field]) if sanitized[field]
+      end
+
+      # Ensure billPriceSetting is a valid value
+      if sanitized[:billPriceSetting]
+        unless %w[0 1].include?(sanitized[:billPriceSetting].to_s)
+          raise ArgumentError, "billPriceSetting must be '0' (fixed) or '1' (open)"
+        end
+      end
+
+      # Ensure billPaymentChannel is a valid value
+      if sanitized[:billPaymentChannel]
+        unless %w[0 1 2].include?(sanitized[:billPaymentChannel].to_s)
+          raise ArgumentError, "billPaymentChannel must be '0' (FPX), '1' (Credit Card), or '2' (Both)"
+        end
+      end
+
+      # Ensure amount is numeric and positive if present
+      if sanitized[:billAmount]
+        amount = sanitized[:billAmount].to_s.to_i
+        if amount <= 0
+          raise ArgumentError, "billAmount must be a positive integer (in cents)"
+        end
+      end
+
+      sanitized
+    end
   end
 end

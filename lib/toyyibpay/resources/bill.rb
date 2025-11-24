@@ -42,6 +42,9 @@ module ToyyibPay
       def create(params = {})
         validate_create_params!(params)
 
+        # Sanitize and validate input parameters
+        params = ToyyibPay::Util.sanitize_bill_params(params)
+
         # Ensure categoryCode is set
         params[:categoryCode] ||= client.config.category_code
 
