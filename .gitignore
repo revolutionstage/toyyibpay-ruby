@@ -1,0 +1,49 @@
+*.gem
+*.rbc
+/.config
+/coverage/
+/InstalledFiles
+/pkg/
+/spec/reports/
+/spec/examples.txt
+/test/tmp/
+/test/version_tmp/
+/tmp/
+
+# Used by dotenv library to load environment variables.
+.env
+
+# rspec failure tracking
+.rspec_status
+
+# Documentation cache and generated files:
+/.yardoc/
+/_yardoc/
+/doc/
+/rdoc/
+
+# Environment normalization:
+/.bundle/
+/vendor/bundle
+/lib/bundler/man/
+
+# Ignore Byebug command history file.
+.byebug_history
+
+# Ignore RubyMine project files
+.idea/
+
+# Ignore VS Code project files
+.vscode/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Ignore master key for decrypting credentials and more.
+/config/master.key
