@@ -29,6 +29,10 @@ require_relative "toyyibpay/resources/bill"
 require_relative "toyyibpay/resources/settlement"
 require_relative "toyyibpay/resources/user"
 
+# Ticket and Wallet features
+require_relative "toyyibpay/ticket"
+require_relative "toyyibpay/wallet"
+
 # Rails integration
 require_relative "toyyibpay/railtie" if defined?(Rails::Railtie)
 

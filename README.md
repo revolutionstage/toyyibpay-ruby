@@ -20,6 +20,9 @@ ToyyibPay is a Malaysian payment gateway that supports FPX (online banking) and 
 - ✅ **Built-in callback verification (prevents payment fraud)**
 - ✅ **Input sanitization (prevents XSS and injection attacks)**
 - ✅ Well-documented and tested
+- ✅ **HTML ticket export with customizable templates**
+- ✅ **Apple Wallet (Passbook) integration**
+- ✅ **Google Wallet integration**
 
 ## 🔐 Security
 
@@ -345,6 +348,239 @@ summary = ToyyibPay.settlements.summary(
 # Get user status
 status = ToyyibPay.users.status
 ```
+
+## Ticket Export & Wallet Integration
+
+Generate beautiful HTML tickets and integrate with native mobile wallets for event passes, entry tickets, and receipts.
+
+### HTML Ticket Generation
+
+Generate customizable HTML tickets from transaction data:
+
+```ruby
+# Basic ticket generation
+transaction = ToyyibPay.bills.transactions("bill-code-here").first
+
+html = ToyyibPay::Ticket.generate(transaction, {
+  event_name: "Tech Conference 2024",
+  event_date: "March 15, 2024",
+  event_time: "9:00 AM - 5:00 PM",
+  event_location: "KLCC Convention Center, Kuala Lumpur",
+  ticket_type: "VIP Pass",
+  organizer_name: "TechEvents Malaysia",
+  organizer_logo: "https://example.com/logo.png"
+})
+
+# Save to file
+ToyyibPay::Ticket.generate_to_file(transaction, "/path/to/ticket.html", {
+  event_name: "Concert Night",
+  theme: :dark  # :default, :dark, or :minimal
+})
+
+# Generate batch tickets
+transactions = ToyyibPay.bills.transactions("bill-code-here")
+tickets = ToyyibPay::Ticket.generate_batch(transactions, {
+  event_name: "Annual Gala",
+  event_date: "December 31, 2024"
+})
+```
+
+#### Ticket Options
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `event_name` | String | Event/product name |
+| `event_date` | String | Event date |
+| `event_time` | String | Event time |
+| `event_location` | String | Event venue |
+| `ticket_type` | String | Ticket category (e.g., "VIP", "General") |
+| `seat_info` | String | Seat information |
+| `gate_info` | String | Gate/entrance info |
+| `organizer_name` | String | Organizer name |
+| `organizer_logo` | String | Logo URL or base64 |
+| `theme` | Symbol | `:default`, `:dark`, or `:minimal` |
+| `include_qr` | Boolean | Include QR code (default: true) |
+| `custom_fields` | Hash | Additional fields to display |
+| `terms` | String | Terms and conditions |
+| `template` | String | Custom ERB template |
+
+#### Custom Templates
+
+```ruby
+custom_template = <<~ERB
+  <!DOCTYPE html>
+  <html>
+  <body>
+    <h1><%= event_name %></h1>
+    <p>Ticket: <%= ticket_number %></p>
+    <p>Attendee: <%= payer_name %></p>
+    <%= qr_svg %>
+  </body>
+  </html>
+ERB
+
+html = ToyyibPay::Ticket.generate(transaction, {
+  template: custom_template,
+  event_name: "My Event"
+})
+```
+
+### Apple Wallet (Passbook)
+
+Generate `.pkpass` files for Apple Wallet:
+
+```ruby
+# Initialize Apple Wallet generator
+apple_wallet = ToyyibPay::Wallet.apple(
+  pass_type_identifier: "pass.com.yourcompany.event",
+  team_identifier: "ABCD1234XY",
+  organization_name: "Your Company",
+  # For signed passes (required for production):
+  certificate_path: "/path/to/pass.p12",
+  certificate_password: "your-password",
+  wwdr_certificate_path: "/path/to/wwdr.pem"
+)
+
+# Generate pass data
+pass_data = apple_wallet.generate_pass(transaction, {
+  style: :event_ticket,
+  event_name: "Tech Conference 2024",
+  event_date: "2024-03-15T09:00:00+08:00",
+  event_location: "KLCC Convention Center",
+  ticket_type: "VIP",
+  seat_info: "Section A, Row 5",
+  gate_info: "Gate B",
+  background_color: "rgb(60, 65, 76)",
+  foreground_color: "rgb(255, 255, 255)"
+})
+
+# Generate .pkpass file
+pkpass_path = apple_wallet.generate_pkpass(transaction, "/tmp/ticket", {
+  style: :event_ticket,
+  event_name: "Concert",
+  icon_path: "/path/to/icon.png",
+  logo_path: "/path/to/logo.png"
+})
+# => "/tmp/ticket.pkpass"
+```
+
+#### Apple Wallet Setup
+
+1. **Apple Developer Account**: Required for signing passes
+2. **Pass Type ID**: Create in Apple Developer Portal → Certificates → Pass Type IDs
+3. **Certificate**: Download and export as .p12
+4. **WWDR Certificate**: Download Apple Worldwide Developer Relations certificate
+
+#### Pass Styles
+
+- `:event_ticket` - Concerts, conferences, sports events
+- `:boarding_pass` - Travel tickets
+- `:coupon` - Discounts and promotions
+- `:store_card` - Loyalty cards
+- `:generic` - General purpose passes
+
+### Google Wallet
+
+Generate Google Wallet passes:
+
+```ruby
+# Initialize Google Wallet generator
+google_wallet = ToyyibPay::Wallet.google(
+  issuer_id: "3388000000012345678",
+  service_account_key_path: "/path/to/service-account.json"
+)
+
+# Generate ticket data
+ticket = google_wallet.generate_ticket(transaction, {
+  event_name: "Tech Conference 2024",
+  event_date: "2024-03-15T09:00:00+08:00",
+  venue_name: "KLCC Convention Center",
+  venue_address: "Kuala Lumpur City Centre, Malaysia",
+  latitude: 3.1579,
+  longitude: 101.7116,
+  ticket_type: "VIP",
+  seat_section: "A",
+  seat_row: "5",
+  seat_number: "12",
+  logo_uri: "https://example.com/logo.png",
+  hero_image_uri: "https://example.com/event-banner.png"
+})
+
+# Generate "Save to Google Wallet" URL
+save_url = google_wallet.save_url(transaction, {
+  event_name: "Concert",
+  venue_name: "Stadium"
+})
+# => "https://pay.google.com/gp/v/save/eyJ..."
+
+# Generate HTML button
+button_html = google_wallet.add_button_html(transaction, {
+  event_name: "Concert"
+})
+```
+
+#### Google Wallet Setup
+
+1. **Google Cloud Project**: Enable Google Wallet API
+2. **Service Account**: Create with appropriate permissions
+3. **Issuer Account**: Register at Google Pay & Wallet Console
+
+### Multi-Platform Support
+
+Generate passes for multiple platforms at once:
+
+```ruby
+# Generate for both platforms
+passes = ToyyibPay::Wallet.generate_all(
+  transaction,
+  {
+    event_name: "Tech Conference 2024",
+    event_date: "2024-03-15T09:00:00+08:00",
+    event_location: "KLCC Convention Center"
+  },
+  {
+    apple: {
+      pass_type_identifier: "pass.com.example.event",
+      team_identifier: "ABCD1234"
+    },
+    google: {
+      issuer_id: "3388000000012345678",
+      service_account_key_path: "/path/to/key.json"
+    }
+  }
+)
+
+# Access generated data
+apple_pass = passes[:apple][:pass_data]
+google_pass = passes[:google][:pass_data]
+google_url = passes[:google][:save_url]
+
+# Generate wallet buttons HTML
+buttons = ToyyibPay::Wallet.buttons_html(
+  transaction,
+  { event_name: "Concert" },
+  {
+    apple: { download_url: "https://example.com/pass.pkpass" },
+    google: { issuer_id: "123", service_account_key_path: "/path/to/key.json" }
+  }
+)
+```
+
+### Optional Dependencies
+
+For full ticket and wallet functionality, install these optional gems:
+
+```ruby
+# Gemfile
+gem 'rqrcode', '~> 2.0'    # QR code generation in HTML tickets
+gem 'rubyzip', '~> 2.3'    # Creating .pkpass files (Apple Wallet)
+gem 'jwt', '~> 2.7'        # Google Wallet JWT signing
+```
+
+Without these gems:
+- **rqrcode**: QR codes show a placeholder with the bill code
+- **rubyzip**: Falls back to system `zip` command for .pkpass files
+- **jwt**: Google Wallet save URLs cannot be generated
 
 ## Sandbox Mode
 
