@@ -25,6 +25,8 @@ module ToyyibPay
       # Redact sensitive information from logs
       safe_params = Util.redact_sensitive_params(params)
       Util.log(config.logger, :debug, "Request params: #{safe_params.inspect}")
+      # Log encoded body for debugging (redact sensitive parts)
+      Util.log(config.logger, :info, "Request body length: #{body&.length || 0} bytes")
 
       response = execute_request_with_retry(method, url, headers, body)
       handle_response(response)
@@ -153,10 +155,16 @@ module ToyyibPay
       parsed = Util.safe_parse_json(response.body)
 
       # Check for error in response body
+      # ToyyibPay uses multiple error formats:
+      # - {"error": "message"}
+      # - {"status": "error", "msg": "message"}
+      # - [{"error": "message"}]
       if parsed.is_a?(Array) && parsed.first.is_a?(Hash) && parsed.first["error"]
         raise APIError, parsed.first["error"]
       elsif parsed.is_a?(Hash) && parsed["error"]
         raise APIError, parsed["error"]
+      elsif parsed.is_a?(Hash) && parsed["status"] == "error"
+        raise APIError, parsed["msg"] || "Unknown error from ToyyibPay"
       end
 
       parsed
