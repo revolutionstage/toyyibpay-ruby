@@ -110,7 +110,7 @@ module ToyyibPay
 
     def handle_response(response)
       Util.log(config.logger, :info, "Response status: #{response.status}")
-      Util.log(config.logger, :debug, "Response body: #{response.body}")
+      Util.log(config.logger, :info, "Response body (raw): #{response.body}")
 
       case response.status
       when 200..299
