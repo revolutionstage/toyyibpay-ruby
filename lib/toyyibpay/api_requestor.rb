@@ -25,8 +25,6 @@ module ToyyibPay
       # Redact sensitive information from logs
       safe_params = Util.redact_sensitive_params(params)
       Util.log(config.logger, :debug, "Request params: #{safe_params.inspect}")
-      # Log encoded body for debugging (redact sensitive parts)
-      Util.log(config.logger, :info, "Request body length: #{body&.length || 0} bytes")
 
       response = execute_request_with_retry(method, url, headers, body)
       handle_response(response)
@@ -112,7 +110,7 @@ module ToyyibPay
 
     def handle_response(response)
       Util.log(config.logger, :info, "Response status: #{response.status}")
-      Util.log(config.logger, :info, "Response body (raw): #{response.body}")
+      Util.log(config.logger, :debug, "Response body: #{response.body}")
 
       case response.status
       when 200..299

@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    toyyibpay (0.1.0)
+    toyyibpay-ruby (0.1.0)
       faraday (~> 2.0)
       faraday-multipart (~> 1.0)
 
@@ -103,7 +103,7 @@ DEPENDENCIES
   rspec (~> 3.0)
   rubocop (~> 1.0)
   rubocop-rspec (~> 2.0)
-  toyyibpay!
+  toyyibpay-ruby!
   webmock (~> 3.0)
   yard (~> 0.9)
 

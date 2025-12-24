@@ -16,7 +16,7 @@ module ToyyibPay
     def to_s
       status_string = http_status.nil? ? "" : "(Status #{http_status}) "
       id_string = request_id.nil? ? "" : "(Request #{request_id}) "
-      "#{status_string}#{id_string}#{message}"
+      "#{status_string}#{id_string}#{super}"
     end
   end
 
